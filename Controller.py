@@ -72,8 +72,21 @@ class Controller:
     def updateState(self, k, T, prec, vehicle,a,w):
         self.states.append(ControllerState())
         if (prec != None):
-            self.states[k].error_x = self.states[k - 1].error_x + (T * (-self.k1 * self.states[k - 1].error_x))
-            self.states[k].error_y = self.states[k - 1].error_y + (T * (-self.k2 * self.states[k - 1].error_y))
+
+            K1=np.array([
+                [-self.k1 , 0],
+                [0, -self.k2]
+            ])
+
+            Z1=np.array([
+                [self.states[k-1].error_x],
+                [self.states[k-1].error_y]
+            ])
+
+            Result1 = np.dot(K1,Z1)
+
+            self.states[k].error_x = self.states[k - 1].error_x + (T * Result1[0, 0])
+            self.states[k].error_y = self.states[k - 1].error_y + (T * Result1[1, 0])
 
             G = np.array([
                 [(self.h * vehicle.states[k - 1].velocity + self.r * (math.cos(vehicle.states[k - 1].theta) ** 2)) / (
