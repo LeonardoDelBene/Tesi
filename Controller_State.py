@@ -1,6 +1,3 @@
-import math
-import numpy as np
-
 class ControllerState:
     def __init__(self):
         self.error_x = 0
