@@ -5,8 +5,8 @@ from Vehicle_State import *
 import matplotlib.pyplot as plt
 
 def main():
-    k1 = 3.5
-    k2 = 3.5
+    k1 = 0.25
+    k2 = 0.25
     r = 1
     h = 0.2
     T = 0.1
@@ -34,7 +34,11 @@ def main():
         else:
             vehicles.append(Vehicle(False, Controller(r, h, k1, k2)))
         vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
-        vehicles[i].controller.updateState_init(0, vehicles[i-1], vehicles[i], acceleration[0], omega[0])
+        if i != 0:
+            previous_vehicle = vehicles[i - 1]
+        else:
+            previous_vehicle = None
+        vehicles[i].controller.updateState_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
 
 
     for k in range(1, num_steps):

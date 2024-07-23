@@ -10,10 +10,6 @@ class Vehicle:
         self.controller = controller
         self.states = []
 
-    def updateState_first(self,k,T,a,w):
-        self.states.append(VehicleState(0,0,0,0))
-
-
     def updateState(self,k,T,prec):
         self.states.append(VehicleState(0, 0, 0, 0))
         if(prec != None):
@@ -34,5 +30,8 @@ class Vehicle:
                         T * self.states[k - 1].velocity * math.sin(self.states[k - 1].theta))
             self.states[k].theta = self.states[k - 1].theta + (T * self.controller.states[k - 1].omega)
             self.states[k].velocity = self.states[k - 1].velocity + (T * self.controller.states[k - 1].acceleration)
+            print("Vehicle " + str(self.first) + " at time " + str(k))
+            print("x:" + str(self.states[k].x) + " y:" + str(self.states[k].y) + " theta:" + str(
+                self.states[k].theta) + " velocity:" + str(self.states[k].velocity))
 
 
