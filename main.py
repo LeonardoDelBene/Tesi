@@ -10,8 +10,8 @@ def main():
     r = 1
     h = 0.2
     T = 0.1
-    N = 2 # Numero di veicoli
-    num_steps = 10
+    N = 3 # Numero di veicoli
+    num_steps = 500
     vehicles = []
     velocity = 5
 
@@ -35,7 +35,7 @@ def main():
             vehicles[i].controller.updateState_init(0, vehicles[i - 1], vehicles[i])
         else:
             vehicles.append(Vehicle(False, Controller(r, h, k1, k2)))
-            vehicles[i].states.append(VehicleState(-i, 0, 0, velocity))
+            vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
             vehicles[i].controller.updateState_init(0, vehicles[i-1], vehicles[i])
 
 

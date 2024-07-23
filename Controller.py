@@ -39,7 +39,7 @@ class Controller:
             [self.h * math.cos(theta),
              -((self.r + (self.h * velocity)) * math.sin(theta))],
             [self.h * math.sin(theta),
-             -((self.r + (self.h * velocity)) * math.cos(theta))]
+             ((self.r + (self.h * velocity)) * math.cos(theta))]
         ])
 
         # Inverso della matrice F
@@ -64,20 +64,15 @@ class Controller:
             self.z2(prec, k, vehicle)
             self.z3(prec, k, vehicle)
             self.z4(prec, k, vehicle)
-            self.get_acceleration_omega(prec, vehicle, k)
 
     def updateState(self, k, T, prec, vehicle):
         self.states.append(ControllerState())
         if (prec != None):
-            self.z1(prec, k, vehicle)
-            self.z2(prec, k, vehicle)
-            self.z3(prec, k, vehicle)
-            self.z4(prec, k, vehicle)
             self.states[k].error_x = self.states[k - 1].error_x + (T * (-self.k1 * self.states[k - 1].error_x))
             self.states[k].error_y = self.states[k - 1].error_y + (T * (-self.k2 * self.states[k - 1].error_y))
 
             G = np.array([
-                [(self.h * vehicle.states[k - 1].velocity * (math.cos(vehicle.states[k - 1].theta) ** 2)) / (
+                [(self.h * vehicle.states[k - 1].velocity + self.r * (math.cos(vehicle.states[k - 1].theta) ** 2)) / (
                         self.h * (self.r + self.h * vehicle.states[k - 1].velocity)),
                  (self.r * math.sin(vehicle.states[k - 1].theta) * math.cos(vehicle.states[k - 1].theta)) / (
                          self.h * (self.r + self.h * vehicle.states[k - 1].velocity))],
@@ -110,7 +105,7 @@ class Controller:
                 [self.k2 * self.states[k - 1].error_y]
             ])
 
-            Result = (-(np.dot(G, Z))) + (np.dot(H, A) - np.dot(G, K))
+            Result = (np.dot(-G, Z)) + ((np.dot(H, A) - np.dot(G, K)))
 
             self.states[k].error_velocity_x = self.states[k - 1].error_velocity_x + (T * Result[0, 0])
             self.states[k].error_velocity_y = self.states[k - 1].error_velocity_y + (T * Result[1, 0])
