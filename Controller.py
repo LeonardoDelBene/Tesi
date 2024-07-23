@@ -57,15 +57,18 @@ class Controller:
         vehicle.controller.states[k].omega = U[1, 0]
         return U
 
-    def updateState_init(self, k, prec, vehicle):
+    def updateState_init(self, k, prec, vehicle,a,w):
         self.states.append(ControllerState())
         if (prec != None):
             self.z1(prec, k, vehicle)
             self.z2(prec, k, vehicle)
             self.z3(prec, k, vehicle)
             self.z4(prec, k, vehicle)
+        if(vehicle.first):
+            self.states[k].acceleration = a
+            self.states[k].omega = w
 
-    def updateState(self, k, T, prec, vehicle):
+    def updateState(self, k, T, prec, vehicle,a,w):
         self.states.append(ControllerState())
         if (prec != None):
             self.states[k].error_x = self.states[k - 1].error_x + (T * (-self.k1 * self.states[k - 1].error_x))
@@ -109,3 +112,11 @@ class Controller:
 
             self.states[k].error_velocity_x = self.states[k - 1].error_velocity_x + (T * Result[0, 0])
             self.states[k].error_velocity_y = self.states[k - 1].error_velocity_y + (T * Result[1, 0])
+
+        else:
+            self.states[k].error_x = 0
+            self.states[k].error_y = 0
+            self.states[k].error_velocity_x = 0
+            self.states[k].error_velocity_y = 0
+            self.states[k].acceleration = a
+            self.states[k].omega = w

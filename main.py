@@ -10,7 +10,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.1
-    N = 3 # Numero di veicoli
+    N = 2 # Numero di veicoli
     num_steps = 500
     vehicles = []
     velocity = 5
@@ -31,21 +31,16 @@ def main():
     for i in range(N):
         if i == 0:
             vehicles.append(Vehicle(True, Controller(r, h, k1, k2)))
-            vehicles[i].states.append(VehicleState(i, i, 0, velocity))
-            vehicles[i].controller.updateState_init(0, vehicles[i - 1], vehicles[i])
         else:
             vehicles.append(Vehicle(False, Controller(r, h, k1, k2)))
-            vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
-            vehicles[i].controller.updateState_init(0, vehicles[i-1], vehicles[i])
+        vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
+        vehicles[i].controller.updateState_init(0, vehicles[i-1], vehicles[i], acceleration[0], omega[0])
 
 
     for k in range(1, num_steps):
         for i in range(N):
-            if(i == 0):
-                vehicles[i].updateState_first(k, T, acceleration[k], omega[k])
-            else:
-                vehicles[i].updateState(k, T, vehicles[i-1])
-            vehicles[i].controller.updateState(k, T, vehicles[i - 1] if i > 0 else None, vehicles[i])
+            vehicles[i].controller.updateState(k, T, vehicles[i - 1] if i > 0 else None, vehicles[i], acceleration[k], omega[k])
+            vehicles[i].updateState(k, T, vehicles[i - 1] if i > 0 else None)
             state = vehicles[i].states[-1]
             x_positions[i].append(state.x)
             y_positions[i].append(state.y)
