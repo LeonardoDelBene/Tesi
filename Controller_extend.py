@@ -115,3 +115,95 @@ class Controller_extend:
         self.states[k].acceleration = A[0,0]
         self.states[k].omega = A[1,0]
         return A
+
+    def updateState(self, k, T, prec, vehicle,a,w):
+        self.states.append(Controller_extend_state())
+        if(vehicle.first):
+            self.states[k].error_x = 0
+            self.states[k].error_y = 0
+            self.states[k].error_velocity_x = 0
+            self.states[k].error_velocity_y = 0
+            self.states[k].acceleration = a
+            self.states[k].omega = w
+            self.alpha = 0
+            self.s_x_prec = 0
+            self.s_y_prec = 0
+        else:
+            self.states[k].error_x = self.states[k-1].error_x + (T * (-self.k1 * self.states[k-1].error_x))
+            self.states[k].error_y = self.states[k-1].error_y + (T * (-self.k2 * self.states[k-1].error_y))
+
+            H = np.array([
+                [math.cos(prec.states[k - 1].theta),
+                 -(prec.states[k - 1].velocity * math.sin(prec.states[k - 1].theta))],
+                [math.sin(prec.states[k - 1].theta),
+                 (prec.states[k - 1].velocity * math.cos(prec.states[k - 1].theta))]
+            ])
+
+            A = np.array([
+                [prec.controller.states[k - 1].acceleration],
+                [prec.controller.states[k - 1].omega]
+            ])
+
+            O= np.array([
+                [math.sin(vehicle.states[k-1].theta + self.states[k-1].alpha)],
+                [-math.cos(vehicle.states[k-1].theta + self.states[k-1].alpha)]
+            ])
+            radius = prec.states[k].velocity / prec.states[k].omega
+            acceleration_angular = prec.states[k].velocity / radius
+
+            B2= vehicle.states[k-1].velocity * (self.r + (self.h * vehicle.states[k-1].velocity))* (math.cos(self.states[k-1].alpha)**2)*O*((acceleration_angular)/(prec.states[k].acceleration))
+
+            T12 = np.array([
+                [self.h * math.cos(vehicle.states[k-1].theta) - self.h * math.sin(self.states[k].alpha) * math.sin(prec.states[k].theta),
+                 -(self.r + self.h * vehicle.states[k].velocity) * math.sin(vehicle.states[k-1].theta)],
+                [self.h * math.sin(vehicle.states[k-1].theta) + self.h * math.sin(self.states[k].alpha) * math.cos(prec.states[k].theta),
+                 (self.r + self.h * vehicle.states[k].velocity) * math.cos(vehicle.states[k-1].theta)]
+            ])
+
+            T12_inv = np.linalg.inv(T12)
+
+            d= self.states[k-1].velocity * self.h * (prec.controller.states[k].omega / prec.states[k].velocity) *(math.cos(self.states[k-1].alpha)**2)
+
+            T34= np.array([
+                [math.cos(vehicle.states[k-1].theta + self.states[k-1].alpha) - d * math.sin(vehicle.states[k-1].theta + self.states[k-1].alpha), -vehicle.states[k-1].velocity * math.sin(vehicle.states[k-1].theta + self.states[k-1].alpha)],
+                [math.sin(vehicle.states[k-1].theta + self.states[k-1].alpha) + d * math.cos(vehicle.states[k-1].theta + self.states[k-1].alpha), vehicle.states[k-1].velocity * math.cos(vehicle.states[k-1].theta + self.states[k-1].alpha)]
+            ])
+
+            O = np.array([
+                [-math.sin(vehicle.states[k-1].theta)],
+                [math.cos(vehicle.states[k-1].theta)]
+            ])
+
+            R = np.array([
+                [math.cos(prec.states[k].theta), -math.sin(prec.states[k].theta)],
+                [math.sin(prec.states[k].theta), math.cos(prec.states[k].theta)]
+            ])
+
+            S = np.array([
+                [self.s_magnitude(vehicle.states[k-1].velocity, prec.states[k].velocity, prec.states[k].omega) * prec.states[k].omega],
+                [(-((1 - math.cos(self.states[k].alpha)) / (prec.states[k].omega / prec.states[k].velocity) ** 2)) * (
+                            (acceleration_angular) / (prec.states[k].acceleration))]
+            ])
+
+            O_prec = np.array([
+                [math.cos(prec.states[k].theta)],
+                [math.sin(prec.states[k].theta)]
+            ])
+
+            B1 = O * (vehicle.states[k-1].velocity * math.tan(self.states[k].alpha)) + np.dot(R, S) + (
+                        1 - (1 / math.cos(self.states[k].alpha))) * O_prec * prec.states[k].velocity
+
+            K = np.array([
+                [self.k1 * self.states[k].error_x],
+                [self.k2 * self.states[k].error_y]
+            ])
+
+            Z= np.array([
+                [self.states[k-1].error_velocity_x],
+                [self.states[k-1].error_velocity_y]
+            ])
+
+            Result = np.dot(H,A) + B2 - np.dot(np.dot(T34,T12_inv),K) - np.dot(T34,T12_inv)*((1/math.cos(self.states[k-1].alpha)*Z) +B1)
+
+            self.states[k].error_velocity_x= self.states[k-1].error_velocity_x + (T * Result[0,0])
+            self.states[k].error_velocity_y= self.states[k-1].error_velocity_y + (T * Result[1,0])
