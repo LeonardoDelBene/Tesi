@@ -21,9 +21,6 @@ class Vehicle:
             self.states[k].velocity = self.states[k - 1].velocity + (T * A[0, 0])
             self.states[k].theta = self.states[k - 1].theta + (T * A[1, 0])
 
-            print("Vehicle " + str(self.first) + " at time " + str(k))
-            print("x:" + str(self.states[k].x) + " y:" + str(self.states[k].y) + " theta:" + str(
-                self.states[k].theta) + " velocity:" + str(self.states[k].velocity))
         else:
             self.states[k].x = self.states[k - 1].x + (
                         T * self.states[k - 1].velocity * math.cos(self.states[k - 1].theta))
@@ -31,9 +28,5 @@ class Vehicle:
                         T * self.states[k - 1].velocity * math.sin(self.states[k - 1].theta))
             self.states[k].velocity = self.states[k - 1].velocity + (T * self.controller.states[k - 1].acceleration)
             self.states[k].theta = self.states[k - 1].theta + (T * self.controller.states[k - 1].omega)
-
-            print("Vehicle " + str(self.first) + " at time " + str(k))
-            print("x:" + str(self.states[k].x) + " y:" + str(self.states[k].y) + " theta:" + str(
-                self.states[k].theta) + " velocity:" + str(self.states[k].velocity))
 
 

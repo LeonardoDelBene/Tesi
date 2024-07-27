@@ -1,17 +1,17 @@
 from vehicle import *
-from Controller import *
+from Controller_standard import *
 from Vehicle_State import *
 import matplotlib.pyplot as plt
 
 
 def main():
-    k1 = 0.25
-    k2 = 0.25
+    k1 = 3
+    k2 = 3
     r = 1
     h = 0.2
-    T = 0.1
+    T = 0.01 # Passo di campionameneto
     N = 2 # Numero di veicoli
-    num_steps = 200
+    num_steps = 2000 # Numero di passi 20 secondi
     vehicles = []
     velocity = 5
 
@@ -22,15 +22,15 @@ def main():
     omega = []
     for j in range(num_steps):
         acceleration.append(0)
-        if j < 20:
+        if j < 1/T:
             omega.append(0)
-        elif j>=20 and j<40:
+        elif j >= 1/T and j < 4/T:
             omega.append(0.5)
-        elif j>=40 and j<60:
+        elif j >= 4/T and j < 6/T:
             omega.append(0)
-        elif j>=60 and j<80:
+        elif j >= 6/T and j < 8/T:
             omega.append(-0.5)
-        elif j>=80 and j<100:
+        elif j >= 8/T and j < 10/T:
             omega.append(0)
         else:
             omega.append(0.5)
