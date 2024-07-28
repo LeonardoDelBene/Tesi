@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    k1 = 3
-    k2 = 3
+    k1 = 3.5
+    k2 = 3.5
     r = 1
     h = 0.2
     T = 0.01 # Passo di campionameneto
-    N = 2 # Numero di veicoli
+    N = 6 # Numero di veicoli
     num_steps = 2000 # Numero di passi 20 secondi
     vehicles = []
     velocity = 5
@@ -23,15 +23,7 @@ def main():
     omega = []
     for j in range(num_steps):
         acceleration.append(0)
-        if j < 1/T:
-            omega.append(0)
-        elif j >= 1/T and j < 4/T:
-            omega.append(0.5)
-        elif j >= 4/T and j < 6/T:
-            omega.append(0)
-        elif j >= 6/T and j < 8/T:
-            omega.append(-0.5)
-        elif j >= 8/T and j < 10/T:
+        if j < 10/T:
             omega.append(0)
         else:
             omega.append(0.5)
