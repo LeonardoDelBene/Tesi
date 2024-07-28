@@ -1,3 +1,4 @@
+from Controller_extend import Controller_extend
 from vehicle import *
 from Controller_standard import *
 from Vehicle_State import *
@@ -35,17 +36,34 @@ def main():
         else:
             omega.append(0.5)
 
-    for i in range(N):
-        if i == 0:
-            vehicles.append(Vehicle(True, Controller(r, h, k1, k2)))
-        else:
-            vehicles.append(Vehicle(False, Controller(r, h, k1, k2)))
-        vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
-        if i != 0:
-            previous_vehicle = vehicles[i - 1]
-        else:
-            previous_vehicle = None
-        vehicles[i].controller.updateState_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
+    contr=input("Inserire 1 per Controller_standard, 2 per Controller_extend: ")
+    if contr == "1":
+        for i in range(N):
+            if i == 0:
+                vehicles.append(Vehicle(True, Controller(r, h, k1, k2)))
+            else:
+                vehicles.append(Vehicle(False, Controller(r, h, k1, k2)))
+            vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
+            if i != 0:
+                previous_vehicle = vehicles[i - 1]
+            else:
+                previous_vehicle = None
+            vehicles[i].controller.updateState_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
+    elif contr == "2":
+        for i in range(N):
+            if i==0:
+                vehicles.append(Vehicle(True, Controller_extend(r, h, k1, k2)))
+            else:
+                vehicles.append(Vehicle(False, Controller_extend(r, h, k1, k2)))
+            vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
+            if i != 0:
+                previous_vehicle = vehicles[i - 1]
+            else:
+                previous_vehicle = None
+            vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
+
+
+
 
     for k in range(1, num_steps):
         for i in range(N):
