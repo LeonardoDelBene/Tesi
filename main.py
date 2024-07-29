@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -15,34 +14,29 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
     times = np.arange(0, T_max, T)
     num_steps = len(times)
 
-    # Prepare lists for positions of the current vehicle
     Pos_vehicle = [(vehicle.states[i].x, vehicle.states[i].y) for i in range(num_steps)]
 
-    # Calculate positions of `prec` at time t - h - (r / v)
+    # Calcolo della posizione del veicolo precedente al tempo t-h-r/v(t)
     Pos_prec = []
     for i in range(num_steps):
-        # Time index for t - h - (r/v)
         t_minus_h_minus_v_r = i - int(h + (r/v[i])/T)
-        # Ensure index is within bounds
         if 0 <= t_minus_h_minus_v_r < len(prec.states):
             Pos_prec.append((prec.states[t_minus_h_minus_v_r].x, prec.states[t_minus_h_minus_v_r].y))
         else:
-            # If the index is out of bounds, append None or handle accordingly
             Pos_prec.append((None, None))
 
-    # Compute the error
+    # Calcolo dell'errore tra le posizioni dei veicoli
     for i in range(num_steps):
         if Pos_prec[i] == (None, None):
-            error.append(np.nan)  # Use NaN to indicate an invalid error value
+            error.append(np.nan)  # Uso di nan per indicare valori non validi
         else:
             diff = np.array(Pos_vehicle[i]) - np.array(Pos_prec[i])
             error.append(np.linalg.norm(diff))
 
-    # Print debug information
+
     print("Times:", times)
     print("Error values:", error)
 
-    # Plot the error vs time
     plt.figure(figsize=(10, 6))
     plt.plot(times, error, label=f'Error between Vehicle {vehicle_number} and Vehicle {vehicle_number - 1}')
     plt.title(f'Error between Vehicle {vehicle_number} and Vehicle {vehicle_number -1} Positions over Time')
@@ -123,7 +117,7 @@ def main():
     # 2D Plots
     plt.figure(figsize=(15, 10))
 
-    # Plot vehicle trajectories
+    # Plot traiettorie
     plt.subplot(3, 1, 1)
     for i in range(N):
         plt.plot(x_positions[i], y_positions[i], label=f'Vehicle {i + 1} Trajectory')
@@ -133,7 +127,7 @@ def main():
     plt.legend()
     plt.grid(True)
 
-    # Plot X positions vs. time
+    # Plot posizione lungo x vs tempo
     plt.subplot(3, 1, 2)
     for i in range(N):
         plt.plot(times, x_positions[i], label=f'Vehicle {i + 1} X Position')
@@ -143,7 +137,7 @@ def main():
     plt.legend()
     plt.grid(True)
 
-    # Plot Y positions vs. time
+    # Plot posizione lungo y vs tempo
     plt.subplot(3, 1, 3)
     for i in range(N):
         plt.plot(times, y_positions[i], label=f'Vehicle {i + 1} Y Position')
@@ -156,7 +150,7 @@ def main():
     plt.tight_layout()
     plt.show()
 
-    # 3D Plot: X, Y positions vs. time
+    # 3D Plot
     fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection='3d')
     for i in range(N):
@@ -171,7 +165,7 @@ def main():
     plt.show()
 
 
-    # Calculate and plot errors between vehicles
+    # Calcolo dell'errore tra i veicoli
     v = []
     Error_total = []
     for i in range(1, N):
@@ -180,6 +174,7 @@ def main():
         e = Error(vehicles[i], vehicles[i - 1], T_max, T, h, v, r, i)
         Error_total.append(e)
 
+    #Calcolo dell'errore medio di ogni veicolo
     Error_medio = []
     for j in range(1, N):
         # Inizializza la lista 'sum' con zeri
@@ -199,15 +194,6 @@ def main():
         Error_medio.append(math.sqrt(average_sum))
 
         print(f"Errore medio tra i veicoli {j - 1 + 1} e {j + 1} : {Error_medio[j - 1]}")
-
-
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     main()
