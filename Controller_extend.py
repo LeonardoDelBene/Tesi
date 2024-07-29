@@ -143,9 +143,10 @@ class Controller_extend:
             self.states[k].error_velocity_y = 0
             self.states[k].acceleration = a
             self.states[k].omega = w
-            self.alpha = 0
-            self.s_x_prec = 0
-            self.s_y_prec = 0
+            self.states[k].alpha = 0
+            self.states[k].s_x_prec = 0
+            self.states[k].s_y_prec = 0
+
         else:
             self.states[k].error_x = self.states[k-1].error_x + (T * (-self.k1 * self.states[k-1].error_x))
             self.states[k].error_y = self.states[k-1].error_y + (T * (-self.k2 * self.states[k-1].error_y))
