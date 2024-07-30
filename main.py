@@ -1,11 +1,13 @@
-import math
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from Controller_extend import Controller_extend
 from vehicle import *
 from Controller_standard import *
 from Vehicle_State import *
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import math
+from matplotlib.animation import FuncAnimation, PillowWriter
+import matplotlib.patches as patches
 
 
 
@@ -34,9 +36,7 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
             error.append(np.linalg.norm(diff))
 
 
-    print("Times:", times)
-    print("Error values:", error)
-
+    # Plot dell'errore tra le posizioni dei veicoli
     plt.figure(figsize=(10, 6))
     plt.plot(times, error, label=f'Error between Vehicle {vehicle_number} and Vehicle {vehicle_number - 1}')
     plt.title(f'Error between Vehicle {vehicle_number} and Vehicle {vehicle_number -1} Positions over Time')
@@ -49,11 +49,11 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
     return error
 
 def main():
-    k1 = 2.5
-    k2 = 2.5
+    k1 = 0.25
+    k2 = 0.25
     r = 1
     h = 0.2
-    T = 0.01  # Passo di campionamento
+    T = 0.1  # Passo di campionamento
     N = 5  # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
@@ -164,6 +164,69 @@ def main():
 
     plt.show()
 
+    # Animazione delle traiettorie
+    fig, ax = plt.subplots()
+    lines = [ax.plot([], [], label=f'Vehicle {i + 1}')[0] for i in range(N)]
+    x_min, x_max = min(map(min, x_positions)), max(map(max, x_positions))
+    y_min, y_max = min(map(min, y_positions)), max(map(max, y_positions))
+    margin_x = (x_max - x_min) * 0.1
+    margin_y = (y_max - y_min) * 0.1
+    ax.set_xlim(x_min - margin_x, x_max + margin_x)
+    ax.set_ylim(y_min - margin_y, y_max + margin_y)
+    ax.set_xlabel('X Position')
+    ax.set_ylabel('Y Position')
+    ax.set_title('Vehicle Trajectories')
+    ax.legend()
+    ax.grid(True)
+
+    def init():
+        for line in lines:
+            line.set_data([], [])
+        return lines
+
+    def update(frame):
+        for i, line in enumerate(lines):
+            line.set_data(x_positions[i][:frame], y_positions[i][:frame])
+        return lines
+
+    ani = FuncAnimation(fig, update, frames=num_steps, init_func=init, blit=False)
+    ani.save('vehicle_trajectories.gif', writer=PillowWriter(fps=30))
+
+    plt.show()
+
+    fig, ax = plt.subplots()
+    rects = [patches.Rectangle((x_positions[i][0], y_positions[i][0]), 2, 0.5, angle=0, color=np.random.rand(3, ),
+                               label=f'Vehicle {i + 1}') for i in range(N)]
+    for rect in rects:
+        ax.add_patch(rect)
+
+    x_min, x_max = min(map(min, x_positions)), max(map(max, x_positions))
+    y_min, y_max = min(map(min, y_positions)), max(map(max, y_positions))
+    margin_x = (x_max - x_min) * 0.1
+    margin_y = (y_max - y_min) * 0.1
+    ax.set_xlim(x_min - margin_x, x_max + margin_x)
+    ax.set_ylim(y_min - margin_y, y_max + margin_y)
+    ax.set_xlabel('X Position')
+    ax.set_ylabel('Y Position')
+    ax.set_title('Vehicle Trajectories Rectangles')
+    ax.legend()
+    ax.grid(True)
+
+    def init():
+        for rect in rects:
+            rect.set_xy((0, 0))
+        return rects
+
+    def update(frame):
+        for i, rect in enumerate(rects):
+            rect.set_xy((x_positions[i][frame], y_positions[i][frame]))
+        return rects
+
+    ani = FuncAnimation(fig, update, frames=num_steps, init_func=init, blit=False)
+    ani.save('vehicle_trajectories_rectangles.gif', writer=PillowWriter(fps=30))
+
+    plt.show()
+
 
     # Calcolo dell'errore tra i veicoli
     v = []
@@ -197,3 +260,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
