@@ -4,7 +4,7 @@ import numpy as np
 from Controller_State import ControllerState
 
 
-class Controller:
+class Controller_standard:
     def __init__(self, r, h, k1, k2):
         self.states = []
         self.r = r

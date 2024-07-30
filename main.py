@@ -68,18 +68,24 @@ def main():
     omega = []
     for j in range(num_steps):
         acceleration.append(0)
-        if j < 7 / T:
+        if j < 3 / T:
+            omega.append(0)
+        elif j>=3 / T and j<7 / T:
+            omega.append(0.5)
+        elif j>=7 / T and j<13 / T:
+            omega.append(-0.2)
+        elif j>=13 / T and j<15 / T:
             omega.append(0)
         else:
-            omega.append(0.5)
+            omega.append(0.3)
 
     contr = input("Inserire 1 per Controller_standard, 2 per Controller_extend: ")
     if contr == "1":
         for i in range(N):
             if i == 0:
-                vehicles.append(Vehicle(True, Controller(r, h, k1, k2)))
+                vehicles.append(Vehicle(True, Controller_standard(r, h, k1, k2)))
             else:
-                vehicles.append(Vehicle(False, Controller(r, h, k1, k2)))
+                vehicles.append(Vehicle(False, Controller_standard(r, h, k1, k2)))
             vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
             if i != 0:
                 previous_vehicle = vehicles[i - 1]
@@ -256,7 +262,7 @@ def main():
         average_sum = sum_errors[num_steps - 1] / num_steps
         Error_medio.append(math.sqrt(average_sum))
 
-        print(f"Errore medio tra i veicoli {j - 1 + 1} e {j + 1} : {Error_medio[j - 1]}")
+        print(f"Errore medio tra i veicoli {j} e {j-1} : {Error_medio[j - 1]}")
 
 if __name__ == "__main__":
     main()
