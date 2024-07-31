@@ -54,7 +54,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.1  # Passo di campionamento
-    N = 5  # Numero di veicoli
+    N = 4  # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
@@ -68,16 +68,10 @@ def main():
     omega = []
     for j in range(num_steps):
         acceleration.append(0)
-        if j < 3 / T:
-            omega.append(0)
-        elif j>=3 / T and j<7 / T:
-            omega.append(0.5)
-        elif j>=7 / T and j<13 / T:
-            omega.append(-0.2)
-        elif j>=13 / T and j<15 / T:
+        if j < 7 / T:
             omega.append(0)
         else:
-            omega.append(0.3)
+            omega.append(0.5)
 
     contr = input("Inserire 1 per Controller_standard, 2 per Controller_extend: ")
     if contr == "1":
