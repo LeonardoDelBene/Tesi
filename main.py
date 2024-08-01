@@ -54,7 +54,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.1  # Passo di campionamento
-    N = 4  # Numero di veicoli
+    N = 2  # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
@@ -118,7 +118,7 @@ def main():
     plt.figure(figsize=(15, 10))
 
     # Plot traiettorie
-    plt.subplot(3, 1, 1)
+    plt.subplot(3,1,1)
     for i in range(N):
         plt.plot(x_positions[i], y_positions[i], label=f'Vehicle {i + 1} Trajectory')
     plt.title('Vehicle Trajectories')
@@ -128,7 +128,7 @@ def main():
     plt.grid(True)
 
     # Plot posizione lungo x vs tempo
-    plt.subplot(3, 1, 2)
+    plt.subplot(3,1,2)
     for i in range(N):
         plt.plot(times, x_positions[i], label=f'Vehicle {i + 1} X Position')
     plt.title('X Position vs Time')
