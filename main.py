@@ -49,11 +49,11 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
     return error
 
 def main():
-    k1 = 0.25
-    k2 = 0.25
+    k1 = 2.5
+    k2 = 2.5
     r = 1
     h = 0.2
-    T = 0.1  # Passo di campionamento
+    T = 0.01  # Passo di campionamento
     N = 2  # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
