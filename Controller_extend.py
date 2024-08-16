@@ -1,17 +1,13 @@
 import math
 import numpy as np
+
+from Controller import Controller
 from Controller_extend_state import Controller_extend_state
 
 
-class Controller_extend:
+class Controller_extend(Controller):
     def __init__(self, r, h, k1, k2):
-        self.states = []
-        self.r = r
-        self.h = h
-        self.k1 = k1
-        self.k2 = k2
-
-
+        super().__init__(r, h, k1, k2)
 
     def s_magnitude(self,velocity,velocity_prec, omega_prec):
         if(velocity_prec==0):

@@ -1,16 +1,13 @@
 import math
 import numpy as np
 
+from Controller import Controller
 from Controller_State import ControllerState
 
 
-class Controller_standard:
+class Controller_standard(Controller):
     def __init__(self, r, h, k1, k2):
-        self.states = []
-        self.r = r
-        self.h = h
-        self.k1 = k1
-        self.k2 = k2
+        super().__init__(r, h, k1, k2)
 
     def z1(self, prec, k, vehicle):
         self.states[k].error_x = prec.states[k].x - vehicle.states[k].x - (
@@ -57,7 +54,7 @@ class Controller_standard:
         vehicle.controller.states[kk].omega = U[1, 0]
         return U
 
-    def updateState_init(self, k, prec, vehicle,a,w):
+    def update_state_init(self, k, prec, vehicle,a,w):
         self.states.append(ControllerState())
         if(vehicle.first):
             self.states[k].acceleration = a

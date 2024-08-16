@@ -49,11 +49,11 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
     return error
 
 def main():
-    k1 = 2.5
-    k2 = 2.5
+    k1 = 0.25
+    k2 = 0.25
     r = 1
     h = 0.2
-    T = 0.01  # Passo di campionamento
+    T = 0.1  # Passo di campionamento
     N = 2  # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
@@ -85,7 +85,7 @@ def main():
                 previous_vehicle = vehicles[i - 1]
             else:
                 previous_vehicle = None
-            vehicles[i].controller.updateState_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
+            vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
     elif contr == "2":
         for i in range(N):
             if i == 0:
