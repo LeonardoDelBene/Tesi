@@ -54,7 +54,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.1  # Passo di campionamento
-    N = 2  # Numero di veicoli
+    N = 1  # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
@@ -66,12 +66,30 @@ def main():
 
     acceleration = []
     omega = []
-    for j in range(num_steps):
+    
+    traiettoria=input("Inserire 1 per traiettoria circolare, 2 per traiettoria curvilinea: ")
+    for i in range(num_steps):
         acceleration.append(0)
-        if j < 7 / T:
-            omega.append(0)
-        else:
-            omega.append(0.5)
+    if(traiettoria=="1"):
+        for i in range(num_steps):
+            if (i < 7/T):
+                omega.append(0)
+            else:
+                omega.append(0.5)
+    elif(traiettoria=="2"):
+        for i in range(num_steps):
+            if(i< 3/T):
+                omega.append(0)
+            elif (i>=3/T and i<8/T):
+                omega.append(0.5)
+            elif (i>=8/T and i<12/T):
+                omega.append(-0.5)
+            elif (i>=12/T and i<15/T):
+                omega.append(0)
+            else:
+                omega.append(0.5)
+    else:
+        print("Scelta non valida")
 
     contr = input("Inserire 1 per Controller_standard, 2 per Controller_extend: ")
     if contr == "1":
@@ -98,6 +116,9 @@ def main():
             else:
                 previous_vehicle = None
             vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
+
+    else:
+        print("Scelta non valida")
 
     # Append initial positions
     for i in range(N):
