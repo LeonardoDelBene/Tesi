@@ -49,12 +49,12 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
     return error
 
 def main():
-    k1 = 0.25
-    k2 = 0.25
+    k1 = 2.5
+    k2 = 2.5
     r = 1
     h = 0.2
-    T = 0.1  # Passo di campionamento
-    N = 1  # Numero di veicoli
+    T = 0.01  # Passo di campionamento
+    N = 5  # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
@@ -139,7 +139,8 @@ def main():
     plt.figure(figsize=(15, 10))
 
     # Plot traiettorie
-    plt.subplot(3,1,1)
+    #plt.subplot(3,1,1)
+    plt.figure(figsize=(15, 10))
     for i in range(N):
         plt.plot(x_positions[i], y_positions[i], label=f'Vehicle {i + 1} Trajectory')
     plt.title('Vehicle Trajectories')
@@ -147,9 +148,12 @@ def main():
     plt.ylabel('Y Position')
     plt.legend()
     plt.grid(True)
+    plt.show()
+
 
     # Plot posizione lungo x vs tempo
-    plt.subplot(3,1,2)
+    #plt.subplot(3,1,2)
+    plt.figure(figsize=(15, 10))
     for i in range(N):
         plt.plot(times, x_positions[i], label=f'Vehicle {i + 1} X Position')
     plt.title('X Position vs Time')
@@ -157,9 +161,12 @@ def main():
     plt.ylabel('X Position')
     plt.legend()
     plt.grid(True)
+    plt.show()
+
 
     # Plot posizione lungo y vs tempo
-    plt.subplot(3, 1, 3)
+    #plt.subplot(3, 1, 3)
+    plt.figure(figsize=(15, 10))
     for i in range(N):
         plt.plot(times, y_positions[i], label=f'Vehicle {i + 1} Y Position')
     plt.title('Y Position vs Time')
@@ -167,9 +174,11 @@ def main():
     plt.ylabel('Y Position')
     plt.legend()
     plt.grid(True)
-
-    plt.tight_layout()
     plt.show()
+
+
+    #plt.tight_layout()
+    #plt.show()
 
     # 3D Plot
     fig = plt.figure(figsize=(10, 8))
