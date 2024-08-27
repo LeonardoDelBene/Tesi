@@ -194,6 +194,36 @@ def main():
 
     plt.show()
 
+    # Calcolo dell'errore tra i veicoli
+    v = []
+    Error_total = []
+    for i in range(1, N):
+        for j in range(num_steps):
+            v.append(vehicles[i - 1].states[j].velocity)
+        e = Error(vehicles[i], vehicles[i - 1], T_max, T, h, v, r, i)
+        Error_total.append(e)
+
+    # Calcolo dell'errore medio di ogni veicolo
+    Error_medio = []
+    for j in range(1, N):
+        # Inizializza la lista 'sum' con zeri
+        sum_errors = [0] * num_steps
+
+        # Calcola la somma dei quadrati degli errori
+        for i in range(num_steps):
+            if np.isnan(Error_total[j - 1][i]):
+                sum_errors[i] = sum_errors[i - 1] if i > 0 else 0
+            else:
+                if i == 0:
+                    sum_errors[i] = Error_total[j - 1][i] ** 2
+                else:
+                    sum_errors[i] = sum_errors[i - 1] + (Error_total[j - 1][i] ** 2)
+
+        average_sum = sum_errors[num_steps - 1] / num_steps
+        Error_medio.append(math.sqrt(average_sum))
+
+        print(f"Errore medio tra i veicoli {j} e {j - 1} : {Error_medio[j - 1]}")
+
     # Animazione delle traiettorie
     fig, ax = plt.subplots()
     lines = [ax.plot([], [], label=f'Vehicle {i + 1}')[0] for i in range(N)]
@@ -258,35 +288,6 @@ def main():
     plt.show()
 
 
-    # Calcolo dell'errore tra i veicoli
-    v = []
-    Error_total = []
-    for i in range(1, N):
-        for j in range(num_steps):
-            v.append(vehicles[i - 1].states[j].velocity)
-        e = Error(vehicles[i], vehicles[i - 1], T_max, T, h, v, r, i)
-        Error_total.append(e)
-
-    #Calcolo dell'errore medio di ogni veicolo
-    Error_medio = []
-    for j in range(1, N):
-        # Inizializza la lista 'sum' con zeri
-        sum_errors = [0] * num_steps
-
-        # Calcola la somma dei quadrati degli errori
-        for i in range(num_steps):
-            if np.isnan(Error_total[j - 1][i]):
-                sum_errors[i] = sum_errors[i - 1] if i > 0 else 0
-            else:
-                if i == 0:
-                    sum_errors[i] = Error_total[j - 1][i] ** 2
-                else:
-                    sum_errors[i] = sum_errors[i - 1] + (Error_total[j - 1][i] ** 2)
-
-        average_sum = sum_errors[num_steps - 1] / num_steps
-        Error_medio.append(math.sqrt(average_sum))
-
-        print(f"Errore medio tra i veicoli {j} e {j-1} : {Error_medio[j - 1]}")
 
 if __name__ == "__main__":
     main()
