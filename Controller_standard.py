@@ -27,7 +27,7 @@ class Controller_standard(Controller):
                 vehicle.states[k].velocity * math.sin(vehicle.states[k].theta))
         return self.states[k].error_velocity_y
 
-    def get_acceleration_omega(self, prec, vehicle, k):
+    def get_acceleration_omega(self, prec, vehicle, k,T):
         if(k!=0):
             kk=k+1
         else:
@@ -52,9 +52,10 @@ class Controller_standard(Controller):
         U = np.dot(F_inv, E)
         vehicle.controller.states[kk].acceleration = U[0, 0]
         vehicle.controller.states[kk].omega = U[1, 0]
+        print("acceleration: ", U[0, 0], "Omega: ", U[1, 0])
         return U
 
-    def update_state_init(self, k, prec, vehicle,a,w):
+    def update_state_init(self, k, prec, vehicle,a,w,T):
         self.states.append(ControllerState())
         if(vehicle.first):
             self.states[k].acceleration = a
@@ -68,7 +69,7 @@ class Controller_standard(Controller):
             self.z2(prec, k, vehicle)
             self.z3(prec, k, vehicle)
             self.z4(prec, k, vehicle)
-            self.get_acceleration_omega(prec, vehicle, k)
+            self.get_acceleration_omega(prec, vehicle, k,T)
 
     def updateState(self, k, T, prec, vehicle,a,w):
         self.states.append(ControllerState())

@@ -13,7 +13,7 @@ class Vehicle:
     def updateState(self, k, T, prec):
         self.states.append(VehicleState(0, 0, 0, 0))
         if (prec != None):
-            A = self.controller.get_acceleration_omega(prec, self, k - 1)
+            A = self.controller.get_acceleration_omega(prec, self, k - 1,T)
             self.states[k].x = self.states[k - 1].x + (
                     T * self.states[k - 1].velocity * math.cos(self.states[k - 1].theta))
             self.states[k].y = self.states[k - 1].y + (

@@ -9,11 +9,11 @@ class Controller(ABC):
         self.k2 = k2
 
     @abstractmethod
-    def get_acceleration_omega(self, prec, vehicle, k):
+    def get_acceleration_omega(self, prec, vehicle, k,T):
         pass
 
     @abstractmethod
-    def update_state_init(self, k, prec, vehicle, a, w):
+    def update_state_init(self, k, prec, vehicle, a, w,T):
         pass
 
     @abstractmethod

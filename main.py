@@ -54,7 +54,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.01  # Passo di campionamento
-    N = 5  # Numero di veicoli
+    N = 2  # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
@@ -103,7 +103,7 @@ def main():
                 previous_vehicle = vehicles[i - 1]
             else:
                 previous_vehicle = None
-            vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
+            vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0],T)
     elif contr == "2":
         for i in range(N):
             if i == 0:
@@ -115,7 +115,7 @@ def main():
                 previous_vehicle = vehicles[i - 1]
             else:
                 previous_vehicle = None
-            vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0])
+            vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0],T)
 
     else:
         print("Scelta non valida")
@@ -136,7 +136,7 @@ def main():
             y_positions[i].append(state.y)
 
     # 2D Plots
-    plt.figure(figsize=(15, 10))
+    #plt.figure(figsize=(10, 6))
 
     # Plot traiettorie
     #plt.subplot(3,1,1)
