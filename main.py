@@ -7,6 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import math
 from matplotlib.animation import FuncAnimation, PillowWriter
+import matplotlib.transforms as transforms
 import matplotlib.patches as patches
 
 
@@ -54,7 +55,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.01  # Passo di campionamento
-    N = 2 # Numero di veicoli
+    N = 5 # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
@@ -226,68 +227,118 @@ def main():
 
     # Animazione delle traiettorie
     fig, ax = plt.subplots()
+
+    # Creare le linee per la traiettoria e i pallini per le posizioni attuali
     lines = [ax.plot([], [], label=f'Vehicle {i + 1}')[0] for i in range(N)]
+    scatters = [ax.scatter([], [], s=20, color=lines[i].get_color()) for i in
+                range(N)]  # Pallini alle posizioni correnti
+
+    # Impostazione dei limiti degli assi
     x_min, x_max = min(map(min, x_positions)), max(map(max, x_positions))
     y_min, y_max = min(map(min, y_positions)), max(map(max, y_positions))
     margin_x = (x_max - x_min) * 0.1
     margin_y = (y_max - y_min) * 0.1
     ax.set_xlim(x_min - margin_x, x_max + margin_x)
     ax.set_ylim(y_min - margin_y, y_max + margin_y)
+
+    # Label e titoli
     ax.set_xlabel('X Position')
     ax.set_ylabel('Y Position')
     ax.set_title('Vehicle Trajectories')
     ax.legend()
     ax.grid(True)
 
+    # Funzione di inizializzazione
     def init():
-        for line in lines:
-            line.set_data([], [])
-        return lines
+        for line, scatter in zip(lines, scatters):
+            line.set_data([], [])  # Linea vuota
+            scatter.set_offsets(np.array([[0, 0]]))  # Pallino iniziale fittizio
+        return lines + scatters
 
+    # Funzione di aggiornamento per ogni frame
     def update(frame):
-        for i, line in enumerate(lines):
+        for i, (line, scatter) in enumerate(zip(lines, scatters)):
+            # Aggiornare la linea con la traiettoria fino al frame attuale
             line.set_data(x_positions[i][:frame], y_positions[i][:frame])
-        return lines
 
+            # Aggiornare il pallino alla posizione corrente
+            scatter.set_offsets(np.array([[x_positions[i][frame - 1], y_positions[i][frame - 1]]]))
+
+        return lines + scatters
+
+    # Creare l'animazione
     ani = FuncAnimation(fig, update, frames=num_steps, init_func=init, blit=False)
-    ani.save('vehicle_trajectories.gif', writer=PillowWriter(fps=30))
 
+    # Salvare l'animazione come GIF
+    ani.save('vehicle_trajectories.gif', writer=PillowWriter(fps=30))
     plt.show()
 
+    # Animazione delle traiettorie con rettangoli
+    thetas = [[state.theta for state in vehicle.states] for vehicle in vehicles]  # Theta in radianti
+    angles = [np.degrees(theta) for theta in thetas]  # Theta in gradi
     fig, ax = plt.subplots()
-    rects = [patches.Rectangle((x_positions[i][0], y_positions[i][0]), 2, 0.5, angle=0, color=np.random.rand(3, ),
-                               label=f'Vehicle {i + 1}') for i in range(N)]
+    # Creare una lista di rettangoli iniziali
+    rects = [
+        patches.Rectangle(
+            (x_positions[i][0], y_positions[i][0]), 1, 0.5, color=np.random.rand(3, ), label=f'Vehicle {i + 1}'
+        )
+        for i in range(N)
+    ]
+
+    # Aggiungere i rettangoli all'asse
     for rect in rects:
         ax.add_patch(rect)
 
+    # Calcolare i limiti degli assi
     x_min, x_max = min(map(min, x_positions)), max(map(max, x_positions))
     y_min, y_max = min(map(min, y_positions)), max(map(max, y_positions))
+
+    # Calcola un margine attorno ai dati
     margin_x = (x_max - x_min) * 0.1
     margin_y = (y_max - y_min) * 0.1
+
+    # Impostare i limiti degli assi con margini
     ax.set_xlim(x_min - margin_x, x_max + margin_x)
     ax.set_ylim(y_min - margin_y, y_max + margin_y)
+
+    # Impostare un aspect ratio uguale per mantenere le proporzioni corrette
+    ax.set_aspect('equal')
+
     ax.set_xlabel('X Position')
     ax.set_ylabel('Y Position')
     ax.set_title('Vehicle Trajectories Rectangles')
     ax.legend()
     ax.grid(True)
 
+    # Funzione di inizializzazione
     def init():
         for rect in rects:
             rect.set_xy((0, 0))
         return rects
 
+    # Funzione di aggiornamento per ogni frame
     def update(frame):
         for i, rect in enumerate(rects):
+            # Aggiornare la posizione del rettangolo
             rect.set_xy((x_positions[i][frame], y_positions[i][frame]))
+
+            # Creare la trasformazione con rotazione attorno al centro del rettangolo
+            trans = transforms.Affine2D().rotate_deg_around(
+                x_positions[i][frame], y_positions[i][frame], angles[i][frame]  # Angolo in gradi
+            ) + ax.transData
+
+            # Applicare la trasformazione al rettangolo
+            rect.set_transform(trans)
+
         return rects
 
+    # Creare l'animazione
     ani = FuncAnimation(fig, update, frames=num_steps, init_func=init, blit=False)
+
+    # Salvare l'animazione come GIF
     ani.save('vehicle_trajectories_rectangles.gif', writer=PillowWriter(fps=30))
 
     plt.show()
-
-
 
 if __name__ == "__main__":
     main()
