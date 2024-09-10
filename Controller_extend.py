@@ -30,7 +30,7 @@ class Controller_extend(Controller):
         k_i_1 = prec.controller.states[kk].omega / prec.states[kk].velocity
         res = k_i_1 * (self.r + self.h * vehicle.states[kk].velocity)
         self.states[k].alpha = math.atan(res)
-        print("alpha ", self.states[k].alpha)
+
 
     def error(self, k, prec, vehicle):
         self.states[k].error_x = (
