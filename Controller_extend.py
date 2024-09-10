@@ -108,12 +108,12 @@ class Controller_extend(Controller):
             ])
             der_k = ((prec.controller.states[kk].omega / prec.states[kk].velocity) -(prec.controller.states[kk-1].omega / prec.states[kk-1].velocity)) / T
 
-            B_2 = (self.r + self.h * vehicle.states[kk].velocity) * vehicle.states[kk].velocity * (math.cos(vehicle.controller.states[kk].alpha) ** 2) * O * der_k
+            B_2 = (self.r + (self.h * vehicle.states[kk].velocity)) * vehicle.states[kk].velocity * (math.cos(vehicle.controller.states[kk].alpha) ** 2) * O * der_k
 
 
             Res = np.dot(T_34_i, T_12_inv)
             Res1 = (Z_34 + B_1)
-            Res2 = np.dot(np.dot(T_34_i,T_12_inv),K)
+            Res2 = np.dot(Res,K)
             Res3 = np.dot(H_i_1,A_i_1)
 
 
@@ -141,14 +141,14 @@ class Controller_extend(Controller):
             self.get_acceleration_omega(prec, vehicle, k, T)
 
     def T_12_inv(self, prec, vehicle, k):
-        u_i = self.h * (self.r + self.h * vehicle.states[k].velocity) * (
+        u_i = self.h * (self.r + (self.h * vehicle.states[k].velocity)) * (
                 1 - math.sin(vehicle.controller.states[k].alpha)
                 * math.sin(prec.states[k].theta - vehicle.states[k].theta)
         )
         s_a_i = self.h * math.sin(vehicle.controller.states[k].alpha)
         T_12_inv = np.array([
-            [(self.r + self.h * vehicle.states[k].velocity) * math.cos(vehicle.states[k].theta) / u_i,
-             (self.r + self.h * vehicle.states[k].velocity) * math.sin(vehicle.states[k].theta) / u_i],
+            [(self.r + (self.h * vehicle.states[k].velocity)) * math.cos(vehicle.states[k].theta) / u_i,
+             (self.r + (self.h * vehicle.states[k].velocity)) * math.sin(vehicle.states[k].theta) / u_i],
             [((-self.h * math.sin(vehicle.states[k].theta)) - (s_a_i * math.cos(prec.states[k].theta))) / u_i,
              ((self.h * math.cos(vehicle.states[k].theta)) - (s_a_i * math.sin(prec.states[k].theta))) / u_i]
         ])
@@ -177,7 +177,14 @@ class Controller_extend(Controller):
             [s_magnitude * prec.controller.states[k].omega],
             [-s_k * der_k]
         ])
-        B_1 = O * vehicle.states[k].velocity * math.tan(vehicle.controller.states[k].alpha) + np.dot(R, S)
+
+        O_i_1= np.array([
+            [math.cos(prec.states[k].theta)],
+            [math.sin(prec.states[k].theta)]
+        ])
+        Res = (1-(1/math.cos(vehicle.controller.states[k].alpha))) * O_i_1 * prec.states[k].velocity
+
+        B_1 = O * vehicle.states[k].velocity * math.tan(vehicle.controller.states[k].alpha) + np.dot(R, S) + Res
         return B_1
 
     def get_acceleration_omega(self, prec, vehicle, k, T):
