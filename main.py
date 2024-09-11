@@ -3,7 +3,6 @@ from vehicle import *
 from Controller_standard import *
 from Vehicle_State import *
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import math
 from matplotlib.animation import FuncAnimation, PillowWriter
@@ -55,7 +54,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.01  # Passo di campionamento
-    N = 2 # Numero di veicoli
+    N = 4 # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
