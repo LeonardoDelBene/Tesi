@@ -27,11 +27,11 @@ class Controller_standard(Controller):
                 vehicle.states[k].velocity * math.sin(vehicle.states[k].theta))
         return self.states[k].error_velocity_y
 
-    def get_acceleration_omega(self, prec, vehicle, k,T):
+    def get_acceleration_omega(self, prec, vehicle, k, T):
         if(k != 0):
-            kk=k+1
+            kk = k+1
         else:
-            kk=0
+            kk = 0
         theta = vehicle.states[k].theta
         velocity = vehicle.states[k].velocity
 
@@ -54,9 +54,9 @@ class Controller_standard(Controller):
         vehicle.controller.states[kk].omega = U[1, 0]
         return U
 
-    def update_state_init(self, k, prec, vehicle,a,w,T):
+    def update_state_init(self, k, prec, vehicle, a, w, T):
         self.states.append(ControllerState())
-        if(vehicle.first):
+        if vehicle.first:
             self.states[k].acceleration = a
             self.states[k].omega = w
             self.states[k].error_x = 0
@@ -72,10 +72,10 @@ class Controller_standard(Controller):
 
     def updateState(self, k, T, prec, vehicle,a,w):
         self.states.append(ControllerState())
-        if (prec != None):
+        if prec is not None:
 
             K1=np.array([
-                [-self.k1 , 0],
+                [-self.k1, 0],
                 [0, -self.k2]
             ])
 
@@ -84,7 +84,7 @@ class Controller_standard(Controller):
                 [self.states[k-1].error_y]
             ])
 
-            Result1 = np.dot(K1,Z1)
+            Result1 = np.dot(K1, Z1)
 
             self.states[k].error_x = self.states[k - 1].error_x + (T * Result1[0, 0])
             self.states[k].error_y = self.states[k - 1].error_y + (T * Result1[1, 0])
@@ -123,7 +123,7 @@ class Controller_standard(Controller):
                 [self.k2 * self.states[k - 1].error_y]
             ])
 
-            Result = (np.dot(-G, Z)) + ((np.dot(H, A) + np.dot(-G, K)))
+            Result = (np.dot(-G, Z)) + (np.dot(H, A) + np.dot(-G, K))
 
             self.states[k].error_velocity_x = self.states[k - 1].error_velocity_x + (T * Result[0, 0])
             self.states[k].error_velocity_y = self.states[k - 1].error_velocity_y + (T * Result[1, 0])

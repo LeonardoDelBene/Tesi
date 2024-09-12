@@ -7,5 +7,3 @@ class Controller_extend_state:
         self.acceleration = 0
         self.omega = 0
         self.alpha = 0
-        self.s_x = 0
-        self.s_y = 0
