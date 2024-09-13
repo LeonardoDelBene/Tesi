@@ -19,7 +19,6 @@ class Controller_extend(Controller):
 
         if k_i == 0:
             s_magnitude = 0
-            sqrt_val = 0
         else:
             sqrt_val = max(1 + ((k_i ** 2) * (self.r + self.h * velocity) ** 2), 0)  # Ensure non-negative for sqrt
             s_magnitude = (-1 + math.sqrt(sqrt_val)) / k_i
@@ -27,11 +26,10 @@ class Controller_extend(Controller):
 
     def Alpha(self, k, prec, vehicle):
         kk = max(k - 1, 0)
-        velocity = max(prec.states[kk].velocity, self.epsilon)  # Prevent zero velocity
+        velocity =  prec.states[kk].velocity
         k_i_1 = prec.controller.states[kk].omega / velocity
         res = k_i_1 * (self.r + (self.h * vehicle.states[kk].velocity))
         self.states[k].alpha = math.atan(res)
-
 
     def error(self, k, prec, vehicle):
         s_magnitude=self.s_magnitude(k,vehicle, prec)
@@ -145,13 +143,16 @@ class Controller_extend(Controller):
         else:
             self.states[k].alpha = 0
             self.error(k, prec, vehicle)
+
             self.get_acceleration_omega(prec, vehicle, k, T)
+
 
 
     def T_12_inv(self, prec, vehicle, k):
         u_i_denom = (1 - (math.sin(vehicle.controller.states[k].alpha)
                      * math.sin(prec.states[k].theta - vehicle.states[k].theta)))
-        u_i = self.h * (self.r + (self.h * vehicle.states[k].velocity)) * max(u_i_denom, self.epsilon)
+        u_i = self.h * (self.r + (self.h * vehicle.states[k].velocity)) * u_i_denom
+
 
         s_a_i = self.h * math.sin(vehicle.controller.states[k].alpha)
         T_12_inv = np.array([
@@ -160,6 +161,7 @@ class Controller_extend(Controller):
             [((-self.h * math.sin(vehicle.states[k].theta)) - (s_a_i * math.cos(prec.states[k].theta))) / u_i,
              ((self.h * math.cos(vehicle.states[k].theta)) - (s_a_i * math.sin(prec.states[k].theta))) / u_i]
         ])
+       # print("T_12_inv: ", T_12_inv)
         return T_12_inv
 
     def B_1(self, prec, vehicle, k, T):
@@ -207,7 +209,7 @@ class Controller_extend(Controller):
         B_1 = (O * (vehicle.states[k].velocity * math.tan(alpha)) +
                np.dot(R, S) +
                ((1 - cos_alpha_safe) * O_1 * prec.states[k].velocity))
-
+        #print("B_1: ", B_1)
         return B_1
 
     def get_acceleration_omega(self, prec, vehicle, k, T):
@@ -220,18 +222,21 @@ class Controller_extend(Controller):
         ])
 
         # Utilizzo di epsilon per evitare divisioni per zero nel calcolo di Z_34
-        cos_alpha = max(math.cos(vehicle.controller.states[k].alpha), self.epsilon)  # Prevenzione di cos(alpha) troppo piccolo
+        cos_alpha = math.cos(vehicle.controller.states[k].alpha) # Prevenzione di cos(alpha) troppo piccolo
+
 
         Z_34 = np.array([
             [vehicle.controller.states[k].error_velocity_x / cos_alpha],
             [vehicle.controller.states[k].error_velocity_y / cos_alpha]
         ])
 
+
         T_12_inv = self.T_12_inv(prec, vehicle, k)
 
         B_1 = self.B_1(prec, vehicle, k, T)
 
         Res = Z_12 + Z_34 + B_1
+        print(k, " Res: ", Res)
 
         A = np.dot(T_12_inv, Res)
 
