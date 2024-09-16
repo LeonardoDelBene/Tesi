@@ -8,14 +8,13 @@ from Controller_extend_state import Controller_extend_state
 class Controller_extend(Controller):
     def __init__(self, r, h, k1, k2):
         super().__init__(r, h, k1, k2)
-        self.epsilon = 1e-8  # Small value to prevent division by zero
+
 
     def s_magnitude(self, k, vehicle, prec):
         kk = max(k - 1, 0)  # Safeguard for k-1 when k=0
-        velocity = max(vehicle.states[kk].velocity, self.epsilon)
-        velocity_1 = max(prec.states[kk].velocity, self.epsilon)
+        velocity = vehicle.states[kk].velocity
+        velocity_1 = prec.states[kk].velocity
         k_i = prec.controller.states[kk].omega / velocity_1
-
 
         if k_i == 0:
             s_magnitude = 0
@@ -26,13 +25,13 @@ class Controller_extend(Controller):
 
     def Alpha(self, k, prec, vehicle):
         kk = max(k - 1, 0)
-        velocity =  prec.states[kk].velocity
+        velocity = prec.states[kk].velocity
         k_i_1 = prec.controller.states[kk].omega / velocity
         res = k_i_1 * (self.r + (self.h * vehicle.states[kk].velocity))
         self.states[k].alpha = math.atan(res)
 
     def error(self, k, prec, vehicle):
-        s_magnitude=self.s_magnitude(k,vehicle, prec)
+        s_magnitude = self.s_magnitude(k,vehicle, prec)
         self.states[k].error_x = (
             prec.states[k].x + (s_magnitude * math.sin(prec.states[k].theta))
             - vehicle.states[k].x
@@ -80,8 +79,8 @@ class Controller_extend(Controller):
                 [prec.controller.states[kk].omega]
             ])
 
-            # Controllo per k_i_1 per evitare divisioni per zero
-            k_i_1 = prec.controller.states[kk].omega / max(prec.states[kk].velocity, self.epsilon)
+
+            k_i_1 = prec.controller.states[kk].omega / prec.states[kk].velocity
             delta_i = vehicle.states[kk].velocity * self.h * (math.cos(vehicle.controller.states[kk].alpha) ** 2) * k_i_1
             theta_alpha = vehicle.states[kk].theta + vehicle.controller.states[kk].alpha
 
@@ -97,7 +96,7 @@ class Controller_extend(Controller):
                 [self.k2 * self.states[kk].error_y]
             ])
 
-            cos_alpha = max(math.cos(vehicle.controller.states[kk].alpha), self.epsilon)
+            cos_alpha = math.cos(vehicle.controller.states[kk].alpha)
 
 
             Z_34 = np.array([
@@ -108,24 +107,22 @@ class Controller_extend(Controller):
             B_1 = self.B_1(prec, vehicle, kk, T)
             T_12_inv = self.T_12_inv(prec, vehicle, kk)
 
-            der_k = ((prec.controller.states[kk].omega / max(prec.states[kk].velocity, self.epsilon)) -
-                     (prec.controller.states[kk - 1].omega / max(prec.states[kk - 1].velocity, self.epsilon))) / T
+            der_k = ((prec.controller.states[kk].omega / prec.states[kk].velocity) -
+                     (prec.controller.states[kk - 1].omega / prec.states[kk - 1].velocity)) / T
 
-            # Prevenzione dell'overflow in B_2
             B_2_factor = self.r + (self.h * vehicle.states[kk].velocity)
             O_i = np.array([
                 [math.sin(theta_alpha)],
                 [-math.cos(theta_alpha)]
             ])
-            B_2 = np.clip(B_2_factor * vehicle.states[kk].velocity * (cos_alpha ** 2)* O_i * der_k, -1e10, 1e10)
+            B_2 = B_2_factor * vehicle.states[kk].velocity * (cos_alpha ** 2)* O_i * der_k
 
             Res = np.dot(T_34_i, T_12_inv)
             Res1 = (Z_34 + B_1)
             Res2 = np.dot(Res, K)
             Res3 = np.dot(H_i_1, A_i_1)
 
-            # Prevenzione di valori invalidi o overflow nel risultato finale
-            Result = np.clip(Res3 + B_2 - Res2 - (np.dot(Res, Res1)), -1e10, 1e10)
+            Result = Res3 + B_2 - Res2 - (np.dot(Res, Res1))
 
             self.states[k].error_velocity_x = self.states[k - 1].error_velocity_x + (T * Result[0, 0])
             self.states[k].error_velocity_y = self.states[k - 1].error_velocity_y + (T * Result[1, 0])
@@ -143,9 +140,7 @@ class Controller_extend(Controller):
         else:
             self.states[k].alpha = 0
             self.error(k, prec, vehicle)
-
             self.get_acceleration_omega(prec, vehicle, k, T)
-
 
 
     def T_12_inv(self, prec, vehicle, k):
@@ -165,8 +160,6 @@ class Controller_extend(Controller):
         return T_12_inv
 
     def B_1(self, prec, vehicle, k, T):
-        epsilon = self.epsilon  # Costante per prevenire divisioni per zero
-        max_angle = np.pi / 2 - 1e-5  # Limite per evitare overflow nella tangente
 
         O = np.array([
             [-math.sin(vehicle.states[k].theta)],
@@ -178,17 +171,16 @@ class Controller_extend(Controller):
             [math.sin(prec.states[k].theta), math.cos(prec.states[k].theta)]
         ])
 
-        velocity_1 = max(prec.states[k].velocity, epsilon)
-
+        velocity_1 = prec.states[k].velocity
         k_i = prec.controller.states[k].omega / velocity_1
-        der_k = ((prec.controller.states[k].omega / velocity_1) - (prec.controller.states[k - 1].omega / max(prec.states[k - 1].velocity, epsilon))) / T
+        der_k = ((prec.controller.states[k].omega / velocity_1) - (prec.controller.states[k - 1].omega / prec.states[k-1].velocity)) / T
 
         s_magnitude = self.s_magnitude(k, vehicle, prec)
 
-        if abs(k_i) < epsilon:
+        if k_i == 0:
             s_k = 0
         else:
-            cos_alpha = max(min(math.cos(vehicle.controller.states[k].alpha), 1.0), -1.0)
+            cos_alpha = math.cos(vehicle.controller.states[k].alpha)
             s_k = -(1 - cos_alpha) / (k_i ** 2)
 
         S = np.array([
@@ -201,14 +193,11 @@ class Controller_extend(Controller):
             [math.sin(prec.states[k].theta)]
         ])
 
-        # Limita l'angolo per prevenire valori troppo grandi nella tangente
         alpha = vehicle.controller.states[k].alpha
-        alpha = max(min(alpha, max_angle), -max_angle)
-
-        cos_alpha_safe = max(min(1 / math.cos(alpha), 1e10), -1e10)
+        cos_alpha =  math.cos(alpha)
         B_1 = (O * (vehicle.states[k].velocity * math.tan(alpha)) +
                np.dot(R, S) +
-               ((1 - cos_alpha_safe) * O_1 * prec.states[k].velocity))
+               ((1 - cos_alpha) * O_1 * prec.states[k].velocity))
         #print("B_1: ", B_1)
         return B_1
 
@@ -221,8 +210,7 @@ class Controller_extend(Controller):
             [self.k2 * vehicle.controller.states[k].error_y]
         ])
 
-        # Utilizzo di epsilon per evitare divisioni per zero nel calcolo di Z_34
-        cos_alpha = math.cos(vehicle.controller.states[k].alpha) # Prevenzione di cos(alpha) troppo piccolo
+        cos_alpha = math.cos(vehicle.controller.states[k].alpha)
 
 
         Z_34 = np.array([
@@ -236,7 +224,7 @@ class Controller_extend(Controller):
         B_1 = self.B_1(prec, vehicle, k, T)
 
         Res = Z_12 + Z_34 + B_1
-        print(k, " Res: ", Res)
+
 
         A = np.dot(T_12_inv, Res)
 
