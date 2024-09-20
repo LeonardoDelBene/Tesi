@@ -63,7 +63,11 @@ class Controller_extend(Controller):
             self.states[k].omega = w
             self.states[k].alpha = 0
         else:
+            if (vehicle.id == 1 and k < 1510):
+                print("vehicle: ", vehicle.id, " - Iteration: ", k)
             self.Alpha(k, prec, vehicle)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"Alpha: {self.states[k].alpha}")
 
             self.states[k].error_x = self.states[k - 1].error_x + (T * (-self.k1 * self.states[k - 1].error_x))
             self.states[k].error_y = self.states[k - 1].error_y + (T * (-self.k2 * self.states[k - 1].error_y))
@@ -73,15 +77,21 @@ class Controller_extend(Controller):
                 [math.cos(prec.states[kk].theta), -prec.states[kk].velocity * math.sin(prec.states[kk].theta)],
                 [math.sin(prec.states[kk].theta), prec.states[kk].velocity * math.cos(prec.states[kk].theta)]
             ])
+            if (vehicle.id == 1 and k < 1510):
+                print(f"H_i_1: {H_i_1}")
 
             A_i_1 = np.array([
                 [prec.controller.states[kk].acceleration],
                 [prec.controller.states[kk].omega]
             ])
+            if (vehicle.id == 1 and k < 1510):
+                print(f"A_i_1: {A_i_1}")
 
 
             k_i_1 = prec.controller.states[kk].omega / prec.states[kk].velocity
             delta_i = vehicle.states[kk].velocity * self.h * (math.cos(vehicle.controller.states[kk].alpha) ** 2) * k_i_1
+            if (vehicle.id == 1 and k < 1510):
+                print(f"Delta_i: {delta_i}")
             theta_alpha = vehicle.states[kk].theta + vehicle.controller.states[kk].alpha
 
             T_34_i = np.array([
@@ -90,42 +100,74 @@ class Controller_extend(Controller):
                 [math.sin(theta_alpha) + (delta_i * math.cos(theta_alpha)),
                  vehicle.states[kk].velocity * math.cos(theta_alpha)]
             ])
+            if (vehicle.id == 1 and k < 1510):
+                print(f"T_34_i: {T_34_i}")
 
             K = np.array([
                 [self.k1 * self.states[kk].error_x],
                 [self.k2 * self.states[kk].error_y]
             ])
+            if (vehicle.id == 1 and k < 1510):
+                print(f"K: {K}")
 
             cos_alpha = math.cos(vehicle.controller.states[kk].alpha)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"Cos_alpha: {cos_alpha}")
 
 
             Z_34 = np.array([
                 [self.states[kk].error_velocity_x / cos_alpha],
                 [self.states[kk].error_velocity_y / cos_alpha]
             ])
+            if (vehicle.id == 1 and k < 1510):
+                print(f"Z_34: {Z_34}")
 
             B_1 = self.B_1(prec, vehicle, kk, T)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"B_1: {B_1}")
             T_12_inv = self.T_12_inv(prec, vehicle, kk)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"T_12_inv: {T_12_inv}")
 
             der_k = ((prec.controller.states[kk].omega / prec.states[kk].velocity) -
                      (prec.controller.states[kk - 1].omega / prec.states[kk - 1].velocity)) / T
+            #der_k = np.clip(der_k, -5,5)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"Derivative of k in B2: {der_k}")
+
 
             B_2_factor = self.r + (self.h * vehicle.states[kk].velocity)
             O_i = np.array([
                 [math.sin(theta_alpha)],
                 [-math.cos(theta_alpha)]
             ])
+            if (vehicle.id == 1 and k < 1510):
+                print(f"O_i: {O_i}")
             B_2 = B_2_factor * vehicle.states[kk].velocity * (cos_alpha ** 2)* O_i * der_k
+            if (vehicle.id == 1 and k < 1510):
+                print(f"B_2: {B_2}")
 
             Res = np.dot(T_34_i, T_12_inv)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"T_34 * T_12: {Res}")
             Res1 = (Z_34 + B_1)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"Z_34 + B_1: {Res1}")
             Res2 = np.dot(Res, K)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"T_34 * T_12 * K: {Res2}")
             Res3 = np.dot(H_i_1, A_i_1)
+            if (vehicle.id == 1 and k < 1510):
+                print(f"H_i_1 * A_i_1: {Res3}")
 
             Result = Res3 + B_2 - Res2 - (np.dot(Res, Res1))
+            if (vehicle.id == 1 and k < 1510):
+                print(f"Result: {Result}")
 
             self.states[k].error_velocity_x = self.states[k - 1].error_velocity_x + (T * Result[0, 0])
             self.states[k].error_velocity_y = self.states[k - 1].error_velocity_y + (T * Result[1, 0])
+            if (vehicle.id == 1 and k < 1510):
+                print(f"Error_x: {self.states[k].error_x}, Error_y: {self.states[k].error_y}, Error_velocity_x: {self.states[k].error_velocity_x}, Error_velocity_y: {self.states[k].error_velocity_y}")
 
     def update_state_init(self, k, prec, vehicle, a, w, T):
         self.states.append(Controller_extend_state())
@@ -142,21 +184,24 @@ class Controller_extend(Controller):
             self.error(k, prec, vehicle)
             self.get_acceleration_omega(prec, vehicle, k, T)
 
-
     def T_12_inv(self, prec, vehicle, k):
         u_i_denom = (1 - (math.sin(vehicle.controller.states[k].alpha)
                      * math.sin(prec.states[k].theta - vehicle.states[k].theta)))
         u_i = self.h * (self.r + (self.h * vehicle.states[k].velocity)) * u_i_denom
+        #if (vehicle.id != 2 and k < 1510):
+         #   print(f"U_i: {u_i}")
 
 
         s_a_i = self.h * math.sin(vehicle.controller.states[k].alpha)
+        #if (vehicle.id != 2 and k < 1510):
+         #   print(f"S_a_i: {s_a_i}")
         T_12_inv = np.array([
             [(self.r + (self.h * vehicle.states[k].velocity)) * math.cos(vehicle.states[k].theta) / u_i,
              (self.r + (self.h * vehicle.states[k].velocity)) * math.sin(vehicle.states[k].theta) / u_i],
             [((-self.h * math.sin(vehicle.states[k].theta)) - (s_a_i * math.cos(prec.states[k].theta))) / u_i,
              ((self.h * math.cos(vehicle.states[k].theta)) - (s_a_i * math.sin(prec.states[k].theta))) / u_i]
         ])
-       # print("T_12_inv: ", T_12_inv)
+        #print("T_12_inv: ", T_12_inv)
         return T_12_inv
 
     def B_1(self, prec, vehicle, k, T):
@@ -173,10 +218,16 @@ class Controller_extend(Controller):
 
         velocity_1 = prec.states[k].velocity
         k_i = prec.controller.states[k].omega / velocity_1
+        if (vehicle.id == 1 and k < 1510):
+           print(f"K_i: {k_i}")
         der_k = ((prec.controller.states[k].omega / velocity_1) - (prec.controller.states[k - 1].omega / prec.states[k-1].velocity)) / T
+        der_k = np.clip(der_k, -5, 5)
+        if (vehicle.id == 1 and k < 1510):
+            print(f"Derivative of k in B1: {der_k}")
 
         s_magnitude = self.s_magnitude(k, vehicle, prec)
-
+        if (vehicle.id == 1 and k < 1510):
+            print(f"S_magnitude: {s_magnitude}")
         if k_i == 0:
             s_k = 0
         else:
@@ -187,18 +238,22 @@ class Controller_extend(Controller):
             [s_magnitude * prec.controller.states[k].omega],
             [s_k * der_k]
         ])
+        if (vehicle.id == 1 and k < 1510):
+            print(f"S: {S}")
 
         O_1 = np.array([
             [math.cos(prec.states[k].theta)],
             [math.sin(prec.states[k].theta)]
         ])
 
+
         alpha = vehicle.controller.states[k].alpha
         cos_alpha =  math.cos(alpha)
         B_1 = (O * (vehicle.states[k].velocity * math.tan(alpha)) +
                np.dot(R, S) +
                ((1 - cos_alpha) * O_1 * prec.states[k].velocity))
-        #print("B_1: ", B_1)
+        #if (vehicle.id != 2 and k < 1510):
+         #   print(f"B_1: {B_1}")
         return B_1
 
     def get_acceleration_omega(self, prec, vehicle, k, T):
@@ -227,9 +282,15 @@ class Controller_extend(Controller):
 
 
         A = np.dot(T_12_inv, Res)
+        acc= np.clip(A[0, 0], -3, 3)
+        ome = np.clip(A[1, 0], -  math.pi/4, math.pi/4)
+        #acc = A[0, 0]
+        #ome = A[1, 0]
 
-        self.states[kk].acceleration = A[0, 0]
-        self.states[kk].omega = A[1, 0]
+        self.states[kk].acceleration = acc
+        self.states[kk].omega = ome
+        if (vehicle.id == 1 and k < 1510):
+            print(" Acceleration:", {self.states[kk].acceleration}," Omega:", {self.states[kk].omega})
 
         return A
 

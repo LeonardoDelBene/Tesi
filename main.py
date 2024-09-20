@@ -54,7 +54,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.01  # Passo di campionamento
-    N = 2 # Numero di veicoli
+    N = 4 # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
@@ -95,9 +95,9 @@ def main():
     if contr == "1":
         for i in range(N):
             if i == 0:
-                vehicles.append(Vehicle(True, Controller_standard(r, h, k1, k2)))
+                vehicles.append(Vehicle(True, Controller_standard(r, h, k1, k2),i))
             else:
-                vehicles.append(Vehicle(False, Controller_standard(r, h, k1, k2)))
+                vehicles.append(Vehicle(False, Controller_standard(r, h, k1, k2),i))
             vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
             if i != 0:
                 previous_vehicle = vehicles[i - 1]
@@ -107,9 +107,9 @@ def main():
     elif contr == "2":
         for i in range(N):
             if i == 0:
-                vehicles.append(Vehicle(True, Controller_extend(r, h, k1, k2)))
+                vehicles.append(Vehicle(True, Controller_extend(r, h, k1, k2),i))
             else:
-                vehicles.append(Vehicle(False, Controller_extend(r, h, k1, k2)))
+                vehicles.append(Vehicle(False, Controller_extend(r, h, k1, k2),i))
             vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
             if i != 0:
                 previous_vehicle = vehicles[i - 1]
@@ -228,7 +228,7 @@ def main():
 
     # Creare le linee per la traiettoria e i pallini per le posizioni attuali
     lines = [ax.plot([], [], label=f'Vehicle {i + 1}')[0] for i in range(N)]
-    scatters = [ax.scatter([], [], s=20, color=lines[i].get_color()) for i in
+    scatters = [ax.scatter([], [], s=15, color=lines[i].get_color()) for i in
                 range(N)]  # Pallini alle posizioni correnti
 
     # Impostazione dei limiti degli assi
@@ -278,7 +278,7 @@ def main():
     # Creare una lista di rettangoli iniziali
     rects = [
         patches.Rectangle(
-            (x_positions[i][0], y_positions[i][0]), 1, 0.5, color=np.random.rand(3, ), label=f'Vehicle {i + 1}'
+            (x_positions[i][0], y_positions[i][0]), 0.75, 0.25, color=np.random.rand(3, ), label=f'Vehicle {i + 1}'
         )
         for i in range(N)
     ]

@@ -1,26 +1,36 @@
 
 import math
 
+import numpy as np
+
 from Vehicle_State import VehicleState
 
 
 class Vehicle:
-    def __init__(self, first, controller):
+    def __init__(self, first, controller,id):
         self.first = first
         self.controller = controller
         self.states = []
+        self.id=id
 
     def updateState(self, k, T, prec):
         self.states.append(VehicleState(0, 0, 0, 0))
         if (prec != None):
+            #print("veicolo: ", self.id)
             A = self.controller.get_acceleration_omega(prec, self, k-1,T)
             self.states[k].x = self.states[k - 1].x + (T * self.states[k - 1].velocity * math.cos(self.states[k - 1].theta))
             self.states[k].y = self.states[k - 1].y + (T * self.states[k - 1].velocity * math.sin(self.states[k - 1].theta))
-            self.states[k].velocity = self.states[k - 1].velocity + (T * A[0, 0])
-            self.states[k].theta = self.states[k - 1].theta + (T * A[1, 0])
-            print(k)
-            print("x: ", self.states[k].x, "y: ", self.states[k].y, "velocity: ", self.states[k].velocity, "theta: ", self.states[k].theta)
+            vel = self.states[k - 1].velocity + (T * A[0, 0])
+            vel =np.clip(vel,-3,5.2)
+            self.states[k].velocity = vel
 
+            theta = self.states[k - 1].theta + (T * A[1, 0])
+            theta = np.clip(theta, -math.pi * 2, math.pi * 2)
+            self.states[k].theta = theta
+
+            if (self.id != 0  and k < 2510):
+                print("x: ", self.states[k].x, "y: ", self.states[k].y, "velocity: ", self.states[k].velocity,
+                      "theta: ", self.states[k].theta)
         else:
             self.states[k].x = self.states[k - 1].x + (
                     T * self.states[k - 1].velocity * math.cos(self.states[k - 1].theta))
@@ -28,7 +38,9 @@ class Vehicle:
                     T * self.states[k - 1].velocity * math.sin(self.states[k - 1].theta))
             self.states[k].velocity = self.states[k - 1].velocity + (T * self.controller.states[k - 1].acceleration)
             self.states[k].theta = self.states[k - 1].theta + (T * self.controller.states[k - 1].omega)
-            print("Leader:")
-            print("x: ", self.states[k].x, "y: ", self.states[k].y, "velocity: ", self.states[k].velocity, "theta: ", self.states[k].theta)
+            if (self.id == 0 and k<2510):
+                print("veicolo: ", self.id, "iterazione: ", k)
+                print("x: ", self.states[k].x, "y: ", self.states[k].y, "velocity: ", self.states[k].velocity,
+                      "theta: ", self.states[k].theta)
 
 
