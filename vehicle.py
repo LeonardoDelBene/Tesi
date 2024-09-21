@@ -21,7 +21,7 @@ class Vehicle:
             self.states[k].x = self.states[k - 1].x + (T * self.states[k - 1].velocity * math.cos(self.states[k - 1].theta))
             self.states[k].y = self.states[k - 1].y + (T * self.states[k - 1].velocity * math.sin(self.states[k - 1].theta))
             vel = self.states[k - 1].velocity + (T * A[0, 0])
-            vel =np.clip(vel,-3,5.2)
+            vel =np.clip(vel,-3,15)
             self.states[k].velocity = vel
 
             theta = self.states[k - 1].theta + (T * A[1, 0])

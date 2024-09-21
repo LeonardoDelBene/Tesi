@@ -54,7 +54,7 @@ def main():
     r = 1
     h = 0.2
     T = 0.01  # Passo di campionamento
-    N = 4 # Numero di veicoli
+    N = 5 # Numero di veicoli
     T_max = 20  # Tempo massimo
     num_steps = int(T_max/T)  # Numero di passi
     vehicles = []
