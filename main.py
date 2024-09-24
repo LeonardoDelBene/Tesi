@@ -202,6 +202,16 @@ def main():
         e = Error(vehicles[i], vehicles[i - 1], T_max, T, h, v, r, i)
         Error_total.append(e)
 
+    plt.figure(figsize=(10, 6))
+    for i in range(1, N):
+        plt.plot(times, Error_total[i - 1], label=f'Error between Vehicle {i} and Vehicle {i - 1}')
+    plt.title('Error Between Vehicles Over Time')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Error (L2 Norm)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
     # Calcolo dell'errore medio di ogni veicolo
     Error_medio = []
     for j in range(1, N):
