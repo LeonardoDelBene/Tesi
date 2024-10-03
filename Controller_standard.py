@@ -1,13 +1,15 @@
 import math
 import numpy as np
-
-from Controller import Controller
 from Controller_State import ControllerState
 
 
-class Controller_standard(Controller):
+class Controller_standard:
     def __init__(self, r, h, k1, k2):
-        super().__init__(r, h, k1, k2)
+        self.states = []
+        self.r = r
+        self.h = h
+        self.k1 = k1
+        self.k2 = k2
 
     def z1(self, prec, k, vehicle):
         self.states[k].error_x = prec.states[k].x - vehicle.states[k].x - (

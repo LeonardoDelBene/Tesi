@@ -1,7 +1,6 @@
-from Controller_extend import Controller_extend
-from vehicle import *
 from Controller_standard import *
 from Vehicle_State import *
+from vehicle import *
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -11,7 +10,8 @@ import matplotlib.patches as patches
 
 
 
-def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
+
+def Error(vehicle, prec, T_max, T, h, v, r, vehicle_number):
     error = []
     times = np.arange(0, T_max, T)
     num_steps = len(times)
@@ -21,7 +21,7 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
     # Calcolo della posizione del veicolo precedente al tempo t-h-r/v(t)
     Pos_prec = []
     for i in range(num_steps):
-        t_minus_h_minus_v_r = i - int(h + (r/v[i])/T)
+        t_minus_h_minus_v_r = i - int(h + (r / v[i]) / T)
         if 0 <= t_minus_h_minus_v_r < len(prec.states):
             Pos_prec.append((prec.states[t_minus_h_minus_v_r].x, prec.states[t_minus_h_minus_v_r].y))
         else:
@@ -35,11 +35,10 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
             diff = np.array(Pos_vehicle[i]) - np.array(Pos_prec[i])
             error.append(np.linalg.norm(diff))
 
-
     # Plot dell'errore tra le posizioni dei veicoli
     plt.figure(figsize=(10, 6))
     plt.plot(times, error, label=f'Error between Vehicle {vehicle_number} and Vehicle {vehicle_number - 1}')
-    plt.title(f'Error between Vehicle {vehicle_number} and Vehicle {vehicle_number -1} Positions over Time')
+    plt.title(f'Error between Vehicle {vehicle_number} and Vehicle {vehicle_number - 1} Positions over Time')
     plt.xlabel('Time (s)')
     plt.ylabel('Error (L2 Norm)')
     plt.legend()
@@ -48,15 +47,16 @@ def Error(vehicle, prec, T_max, T, h, v, r,vehicle_number):
 
     return error
 
+
 def main():
     k1 = 2.5
     k2 = 2.5
     r = 1
     h = 0.2
     T = 0.01  # Passo di campionamento
-    N = 5 # Numero di veicoli
+    N = 5  # Numero di veicoli
     T_max = 20  # Tempo massimo
-    num_steps = int(T_max/T)  # Numero di passi
+    num_steps = int(T_max / T)  # Numero di passi
     vehicles = []
     velocity = 5
 
@@ -66,58 +66,43 @@ def main():
 
     acceleration = []
     omega = []
-    
-    traiettoria=input("Inserire 1 per traiettoria circolare, 2 per traiettoria curvilinea: ")
+
+    traiettoria = input("Inserire 1 per traiettoria circolare, 2 per traiettoria curvilinea: ")
     for i in range(num_steps):
         acceleration.append(0)
-    if(traiettoria=="1"):
+    if (traiettoria == "1"):
         for i in range(num_steps):
-            if (i < 7/T):
+            if (i < 7 / T):
                 omega.append(0)
             else:
                 omega.append(0.5)
-    elif(traiettoria=="2"):
+    elif (traiettoria == "2"):
         for i in range(num_steps):
-            if(i< 3/T):
+            if (i < 3 / T):
                 omega.append(0)
-            elif (i>=3/T and i<8/T):
+            elif (i >= 3 / T and i < 8 / T):
                 omega.append(0.5)
-            elif (i>=8/T and i<12/T):
+            elif (i >= 8 / T and i < 12 / T):
                 omega.append(-0.5)
-            elif (i>=12/T and i<15/T):
+            elif (i >= 12 / T and i < 15 / T):
                 omega.append(0)
             else:
                 omega.append(0.5)
     else:
         print("Scelta non valida")
 
-    contr = input("Inserire 1 per Controller_standard, 2 per Controller_extend: ")
-    if contr == "1":
-        for i in range(N):
-            if i == 0:
-                vehicles.append(Vehicle(True, Controller_standard(r, h, k1, k2),i))
-            else:
-                vehicles.append(Vehicle(False, Controller_standard(r, h, k1, k2),i))
-            vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
-            if i != 0:
-                previous_vehicle = vehicles[i - 1]
-            else:
-                previous_vehicle = None
-            vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0],T)
-    elif contr == "2":
-        for i in range(N):
-            if i == 0:
-                vehicles.append(Vehicle(True, Controller_extend(r, h, k1, k2),i))
-            else:
-                vehicles.append(Vehicle(False, Controller_extend(r, h, k1, k2),i))
-            vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
-            if i != 0:
-                previous_vehicle = vehicles[i - 1]
-            else:
-                previous_vehicle = None
-            vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0],T)
-    else:
-        print("Scelta non valida")
+
+    for i in range(N):
+        if i == 0:
+            vehicles.append(Vehicle(True, Controller_standard(r, h, k1, k2), i))
+        else:
+            vehicles.append(Vehicle(False, Controller_standard(r, h, k1, k2), i))
+        vehicles[i].states.append(VehicleState(-i, i, 0, velocity))
+        if i != 0:
+            previous_vehicle = vehicles[i - 1]
+        else:
+            previous_vehicle = None
+        vehicles[i].controller.update_state_init(0, previous_vehicle, vehicles[i], acceleration[0], omega[0], T)
 
     # Append initial positions
     for i in range(N):
@@ -138,8 +123,8 @@ def main():
     plt.figure(figsize=(10, 6))
 
     # Plot traiettorie
-    plt.subplot(3,1,1)
-    #plt.figure(figsize=(15, 10))
+    plt.subplot(3, 1, 1)
+    # plt.figure(figsize=(15, 10))
     for i in range(N):
         plt.plot(x_positions[i], y_positions[i], label=f'Vehicle {i + 1} Trajectory')
     plt.title('Vehicle Trajectories')
@@ -147,12 +132,11 @@ def main():
     plt.ylabel('Y Position')
     plt.legend()
     plt.grid(True)
-    #plt.show()
-
+    # plt.show()
 
     # Plot posizione lungo x vs tempo
-    plt.subplot(3,1,2)
-    #plt.figure(figsize=(15, 10))
+    plt.subplot(3, 1, 2)
+    # plt.figure(figsize=(15, 10))
     for i in range(N):
         plt.plot(times, x_positions[i], label=f'Vehicle {i + 1} X Position')
     plt.title('X Position vs Time')
@@ -160,12 +144,11 @@ def main():
     plt.ylabel('X Position')
     plt.legend()
     plt.grid(True)
-    #plt.show()
-
+    # plt.show()
 
     # Plot posizione lungo y vs tempo
     plt.subplot(3, 1, 3)
-    #plt.figure(figsize=(15, 10))
+    # plt.figure(figsize=(15, 10))
     for i in range(N):
         plt.plot(times, y_positions[i], label=f'Vehicle {i + 1} Y Position')
     plt.title('Y Position vs Time')
@@ -173,8 +156,7 @@ def main():
     plt.ylabel('Y Position')
     plt.legend()
     plt.grid(True)
-    #plt.show()
-
+    # plt.show()
 
     plt.tight_layout()
     plt.show()
@@ -233,21 +215,36 @@ def main():
 
         print(f"Errore medio tra i veicoli {j} e {j - 1} : {Error_medio[j - 1]}")
 
-    # Animazione delle traiettorie
-    fig, ax = plt.subplots()
+    # Prima di tutto, calcola i limiti globali per entrambe le animazioni
+
+    # Impostazione dei limiti globali (comuni per entrambe le animazioni)
+    x_min = min(map(min, x_positions))
+    x_max = max(map(max, x_positions))
+    y_min = min(map(min, y_positions))
+    y_max = max(map(max, y_positions))
+
+    # Calcola un margine per entrambi gli assi
+    margin_x = (x_max - x_min) * 0.1
+    margin_y = (y_max - y_min) * 0.1
+
+    # Imposta i limiti globali per entrambi gli assi
+    xlim = (x_min - margin_x, x_max + margin_x)
+    ylim = (y_min - margin_y, y_max + margin_y)
+
+    # ---------------------------------------
+    # Prima animazione: Traiettorie con linee e pallini
+    fig, ax = plt.subplots(figsize=(10, 6))  # Usare un formato quadrato per rendere visivamente uguali gli assi
 
     # Creare le linee per la traiettoria e i pallini per le posizioni attuali
     lines = [ax.plot([], [], label=f'Vehicle {i + 1}')[0] for i in range(N)]
-    scatters = [ax.scatter([], [], s=15, color=lines[i].get_color()) for i in
-                range(N)]  # Pallini alle posizioni correnti
+    scatters = [ax.scatter([], [], s=15, color=lines[i].get_color()) for i in range(N)]
 
-    # Impostazione dei limiti degli assi
-    x_min, x_max = min(map(min, x_positions)), max(map(max, x_positions))
-    y_min, y_max = min(map(min, y_positions)), max(map(max, y_positions))
-    margin_x = (x_max - x_min) * 0.1
-    margin_y = (y_max - y_min) * 0.1
-    ax.set_xlim(x_min - margin_x, x_max + margin_x)
-    ax.set_ylim(y_min - margin_y, y_max + margin_y)
+    # Imposta limiti degli assi uguali
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+    # Imposta l'aspect ratio uguale
+    ax.set_aspect('equal')
 
     # Label e titoli
     ax.set_xlabel('X Position')
@@ -266,12 +263,8 @@ def main():
     # Funzione di aggiornamento per ogni frame
     def update(frame):
         for i, (line, scatter) in enumerate(zip(lines, scatters)):
-            # Aggiornare la linea con la traiettoria fino al frame attuale
             line.set_data(x_positions[i][:frame], y_positions[i][:frame])
-
-            # Aggiornare il pallino alla posizione corrente
             scatter.set_offsets(np.array([[x_positions[i][frame - 1], y_positions[i][frame - 1]]]))
-
         return lines + scatters
 
     # Creare l'animazione
@@ -281,10 +274,12 @@ def main():
     ani.save('vehicle_trajectories.gif', writer=PillowWriter(fps=30))
     plt.show()
 
-    # Animazione delle traiettorie con rettangoli
+    # ---------------------------------------
     thetas = [[state.theta for state in vehicle.states] for vehicle in vehicles]  # Theta in radianti
-    angles = [np.degrees(theta) for theta in thetas]  # Theta in gradi
-    fig, ax = plt.subplots()
+    angles = [np.degrees(theta) for theta in thetas]
+    # Seconda animazione: Traiettorie con rettangoli
+    fig, ax = plt.subplots(figsize=(10, 6))  # Stesso formato quadrato
+
     # Creare una lista di rettangoli iniziali
     rects = [
         patches.Rectangle(
@@ -297,21 +292,14 @@ def main():
     for rect in rects:
         ax.add_patch(rect)
 
-    # Calcolare i limiti degli assi
-    x_min, x_max = min(map(min, x_positions)), max(map(max, x_positions))
-    y_min, y_max = min(map(min, y_positions)), max(map(max, y_positions))
+    # Impostare i limiti degli assi globali
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
 
-    # Calcola un margine attorno ai dati
-    margin_x = (x_max - x_min) * 0.1
-    margin_y = (y_max - y_min) * 0.1
-
-    # Impostare i limiti degli assi con margini
-    ax.set_xlim(x_min - margin_x, x_max + margin_x)
-    ax.set_ylim(y_min - margin_y, y_max + margin_y)
-
-    # Impostare un aspect ratio uguale per mantenere le proporzioni corrette
+    # Impostare l'aspect ratio uguale
     ax.set_aspect('equal')
 
+    # Label e titoli
     ax.set_xlabel('X Position')
     ax.set_ylabel('Y Position')
     ax.set_title('Vehicle Trajectories Rectangles')
@@ -332,7 +320,7 @@ def main():
 
             # Creare la trasformazione con rotazione attorno al centro del rettangolo
             trans = transforms.Affine2D().rotate_deg_around(
-                x_positions[i][frame], y_positions[i][frame], angles[i][frame]  # Angolo in gradi
+                x_positions[i][frame], y_positions[i][frame], angles[i][frame]
             ) + ax.transData
 
             # Applicare la trasformazione al rettangolo
@@ -347,6 +335,7 @@ def main():
     ani.save('vehicle_trajectories_rectangles.gif', writer=PillowWriter(fps=30))
 
     plt.show()
+
 
 if __name__ == "__main__":
     main()
